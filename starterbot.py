@@ -37,8 +37,7 @@ def handle_command(command, channel):
 
 
 
-slack_client.api_call("chat.postMessage", channel=channel,
-                      text=response, as_user=True)
+    slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
 
 
 def parse_slack_output(slack_rtm_output):
@@ -76,7 +75,7 @@ if __name__ == "__main__":
                 #print filtered_word_list
                 
                 for word in filtered_word_list:
-                    print " -word-- :"+word
+                    ##print " -word-- :"+word
                     lemmaSentence = lmtzr.lemmatize(word)
                     
                     print lemmaSentence
@@ -89,7 +88,7 @@ if __name__ == "__main__":
         # print "lemma sentence --:" +lemmaSentence
         # print "stemmer sentence --:" +Stemmer
         # print "command:" + command +" and channel:"+channel
-                        handle_command(command, channel)
-                            time.sleep(READ_WEBSOCKET_DELAY)
+                handle_command(command, channel)
+                time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
