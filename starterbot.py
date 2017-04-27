@@ -55,6 +55,10 @@ def parse_slack_output(slack_rtm_output):
                     output['channel']
     return None, None
 
+def compose_query(queryList, channel):
+    for query in queryList:
+        print query
+
 
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
@@ -66,29 +70,31 @@ if __name__ == "__main__":
         while True:
             command, channel = parse_slack_output(slack_client.rtm_read())
             if command and channel:
-                word_list = command.split(" ")
+                word_list = command.lower().split(" ")
                 #print word_list
                 filtered_word_list = word_list[:]
                 for word in word_list: # iterate over word_list
-                    if word in stopwords.words('english'):
-                        filtered_word_list.remove(word)
-                #print filtered_word_list
-                
+                    if word not in ["when","what", "where" ,"how","who"]:
+                        if word in stopwords.words('english'):
+                            filtered_word_list.remove(word)
+                ##print filtered_word_list
+                queryWordsList=[]
                 for word in filtered_word_list:
                     ##print " -word-- :"+word
                     lemmaSentence = lmtzr.lemmatize(word)
-                    
-                    print lemmaSentence
-        
-        
-        
-        
-        
-        
+                    queryWordsList.append(lemmaSentence)
+                print queryWordsList
+
         # print "lemma sentence --:" +lemmaSentence
         # print "stemmer sentence --:" +Stemmer
         # print "command:" + command +" and channel:"+channel
+                compose_query(queryWordsList,channel)
                 handle_command(command, channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
+
+
+
+    
+   
