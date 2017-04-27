@@ -88,6 +88,7 @@ if __name__ == "__main__":
         # print "lemma sentence --:" +lemmaSentence
         # print "stemmer sentence --:" +Stemmer
         # print "command:" + command +" and channel:"+channel
+        ##
                 compose_query(queryWordsList,channel)
                 handle_command(command, channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
