@@ -7,6 +7,7 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 import string
+import MySQLdb
 
 # starterbot's ID as an environment variable
 BOT_ID = os.environ.get("BOT_ID")
@@ -16,6 +17,8 @@ AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
 GREETINGS_COMMAND = ["hi","hello","good evening","good morning","hey","who are you?", "good afternoon" "hey bot"]
 HOW_COMMAND = ["how are you?","how are you doing?", "are you ok?"]
+db = MySQLdb.connect("slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com","master","master123","slackbotdb" )
+
 
 # instantiate Slack & Twilio clients
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
@@ -29,6 +32,16 @@ def handle_command(command, channel):
         """
     response = "Not sure what you mean. Use the *" + ' '.join(EXAMPLE_COMMAND) + \
         "* command with numbers, delimited by spaces."
+
+    if string.lower(str(command)) in GREETINGS_COMMAND:
+        response = "Hello! This is SJSU Bot"
+        
+    if string.lower(str(command)) in HOW_COMMAND:
+        response = "I am good. How may I help you?"            
+        
+    if string.lower(str(command))=="thanks" or string.lower(str(command))=="thank you":
+        response = "Happy to help you!!"
+
     if command in EXAMPLE_COMMAND:
         if command.startswith("do"):
             response = "Do what ??"
@@ -36,18 +49,16 @@ def handle_command(command, channel):
             response= "list of commands for you :\n" + ' '.join(EXAMPLE_COMMAND)
         else:
             response ="How can I help you?"
-            
-    if string.lower(str(command)):        
-        if string.lower(str(command)) in GREETINGS_COMMAND:
-            response = "Hello! This is SJSU Bot"
-        
-        if string.lower(str(command)) in HOW_COMMAND:
-            response = "I am good. How may I help you?"
-        
-        if string.lower(str(command))=="thanks" or string.lower(str(command))=="thank you":
-            response = "Happy to help you!!"
+
+    if command in ['connectdb']:
+        cur = db.cursor()
+        cur.execute("SELECT 1 FROM DUAL")
+        for row in cur.fetchall():
+             response = "Connection Succesful - "+str(row[0])
+    
 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
+
 
 
 def parse_slack_output(slack_rtm_output):
