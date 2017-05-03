@@ -14,6 +14,8 @@ BOT_ID = os.environ.get("BOT_ID")
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
+GREETINGS_COMMAND = ["hi","hello","good evening","good morning","hey","who are you?", "good afternoon" "hey bot"]
+HOW_COMMAND = ["how are you?","how are you doing?", "are you ok?"]
 
 # instantiate Slack & Twilio clients
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
@@ -33,9 +35,17 @@ def handle_command(command, channel):
         elif command.startswith("list"):
             response= "list of commands for you :\n" + ' '.join(EXAMPLE_COMMAND)
         else:
-            response ="Happy to help you!!"
-
-
+            response ="How can I help you?"
+            
+    if string.lower(str(command)):        
+        if string.lower(str(command)) in GREETINGS_COMMAND:
+            response = "Hello! This is SJSU Bot"
+        
+        if string.lower(str(command)) in HOW_COMMAND:
+            response = "I am good. How may I help you?"
+        
+        if string.lower(str(command))=="thanks" or string.lower(str(command))=="thank you":
+            response = "Happy to help you!!"
 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
 
