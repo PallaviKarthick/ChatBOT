@@ -18,7 +18,10 @@ EXAMPLE_COMMAND = ["do","list","help"]
 GREETINGS_COMMAND = ["hi","hello","good evening","good morning","hey","who are you?", "good afternoon" "hey bot"]
 HOW_COMMAND = ["how are you?","how are you doing?", "are you ok?"]
 db = MySQLdb.connect("slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com","master","master123","slackbotdb" )
-
+cur = db.cursor()
+where_list = []
+select_list = []
+query_word_list = []
 
 # instantiate Slack & Twilio clients
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
@@ -50,15 +53,22 @@ def handle_command(command, channel):
         else:
             response ="How can I help you?"
 
-    if command in ['connectdb']:
-        cur = db.cursor()
-        cur.execute("SELECT 1 FROM DUAL")
+    else:
+        generateQuery(command)
+        select_string = select_list[0]
+        where_string = where_list[0]
+        for s in select_list[1:]:
+            select_string += ","+s
+        for w in where_list[1:]:
+            where_string += "AND "+w
+        query = "SELECT "+ select_string +" FROM course_details" + " WHERE "+where_string
+        print query
+        cur.execute(query)
         for row in cur.fetchall():
-             response = "Connection Succesful - "+str(row[0])
-    
+             response = str(row[0])
+
 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
-
 
 
 def parse_slack_output(slack_rtm_output):
@@ -76,9 +86,25 @@ def parse_slack_output(slack_rtm_output):
                     output['channel']
     return None, None
 
-def compose_query(queryList, channel):
-    for query in queryList:
-        print query
+def generateQuery(command):
+    del where_list[:]
+    del select_list[:]
+    if command.lower().startswith("when") : #user is asking for a DATE
+        if 'exam' in query_word_list:
+            where_list.append("TYPE = 'EXAM'")
+            if 'mid' in query_word_list:
+                where_list.append("SUB_TYPE = 'MID'")
+            else :
+                where_list.append("SUB_TYPE = 'FINAL'")
+        select_list.append('START_DATE')
+
+    #if command.startswith("Where") :
+
+    #if command.startswith("What") :
+    
+    #if command.startswith("Who") :
+
+
 
 
 if __name__ == "__main__":
@@ -98,23 +124,23 @@ if __name__ == "__main__":
                     if word not in ["when","what", "where" ,"how","who"]:
                         if word in stopwords.words('english'):
                             filtered_word_list.remove(word)
-                ##print filtered_word_list
-                queryWordsList=[]
+                del query_word_list[:] #Clear query_word_list
                 for word in filtered_word_list:
-                    ##print " -word-- :"+word
                     lemmaSentence = lmtzr.lemmatize(word)
-                    queryWordsList.append(lemmaSentence)
-                print queryWordsList
+                    query_word_list.append(lemmaSentence)
+                print word_list
 
         # print "lemma sentence --:" +lemmaSentence
         # print "stemmer sentence --:" +Stemmer
         # print "command:" + command +" and channel:"+channel
         ##
-                compose_query(queryWordsList,channel)
+                #compose_query(queryWordsList,channel)
                 handle_command(command, channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
+
+
 
 
 
