@@ -32,55 +32,43 @@ slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 
 
 def handle_command(command, channel):
-    """
-        Receives commands directed at the bot and determines if they
-        are valid commands. If so, then acts on the commands. If not,
-        returns back what it needs for clarification.
-        """
-    response = "Not sure what you mean. Use the *" + ' '.join(EXAMPLE_COMMAND) + \
-        "* command with numbers, delimited by spaces."
+    """Receives commands and returns response. """
 
-    if string.lower(str(command)) in GREETINGS_COMMAND:
+    print 'handle_command :'+command+":"
+    if command in GREETINGS_COMMAND:
+        print "GREETINGS_COMMAND"
         response = "Hello! This is SJSU Bot"
         
-    if string.lower(str(command)) in HOW_COMMAND:
+    elif command in HOW_COMMAND:
+        print "HOW_COMMAND"
         response = "I am good. How may I help you?"            
         
-    if string.lower(str(command))=="thanks" or string.lower(str(command))=="thank you":
+    elif command == "thank" or command == "thank you":
+        print "THANK"
         response = "Happy to help you!!"
-
-    if command in EXAMPLE_COMMAND:
-        if command.startswith("do"):
-            response = "Do what ??"
-        elif command.startswith("list"):
-            response= "list of commands for you :\n" + ' '.join(EXAMPLE_COMMAND)
-        else:
-            response ="How can I help you?"
 
     else:
         generateQuery(command)
-        select_string = select_list[0]
-        where_string = where_list[0]
-        for s in select_list[1:]:
-            select_string += ","+s
-        for w in where_list[1:]:
-            where_string += "AND "+w
-        query = "SELECT "+ select_string +" FROM course_details" + " WHERE "+where_string
-        print query
-        cur.execute(query)
-        for row in cur.fetchall():
-             response = str(row[0])
+        if select_list:
+            select_string = select_list[0]
+            where_string = where_list[0]
+            for s in select_list[1:]:
+                select_string += ","+s
+            for w in where_list[1:]:
+                where_string += "AND "+w
+            query = "SELECT "+ select_string +" FROM course_details" + " WHERE "+where_string
+            print query
+            cur.execute(query)
+            for row in cur.fetchall():
+                response = str(row[0])
 
 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
 
 
+
 def parse_slack_output(slack_rtm_output):
-    """
-        The Slack Real Time Messaging API is an events firehose.
-        this parsing function returns None unless a message is
-        directed at the Bot, based on its ID.
-        """
+
     output_list = slack_rtm_output
     if output_list and len(output_list) > 0:
         for output in output_list:
@@ -146,6 +134,8 @@ if __name__ == "__main__":
         
         stemmer = SnowballStemmer("porter")
         lmtzr = WordNetLemmatizer()
+        stop_words= set(stopwords.words('english'))
+        stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}'])
         while True:
             command, channel = parse_slack_output(slack_client.rtm_read())
             if command and channel:
@@ -154,7 +144,7 @@ if __name__ == "__main__":
                 filtered_word_list = word_list[:]
                 for word in word_list: # iterate over word_list
                     if word not in ["when","what", "where" ,"how","who"]:
-                        if word in stopwords.words('english'):
+                        if word in stop_words:
                             filtered_word_list.remove(word)
                 del query_word_list[:] #Clear query_word_list
                 for word in filtered_word_list:
@@ -174,7 +164,7 @@ if __name__ == "__main__":
         ##
                 #compose_query(queryWordsList,channel)
 
-                handle_command(command, channel)
+                handle_command(command.strip(), channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
