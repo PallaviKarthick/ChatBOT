@@ -165,7 +165,7 @@ if __name__ == "__main__":
                 #print word_list
                 filtered_word_list = word_list[:]
                 for word in word_list: # iterate over word_list
-                    if word not in ["when","what", "where" ,"how","who"]:
+                    if word not in ["when","what", "where" ,"how","who","which"]:
                         if word in stop_words:
                             filtered_word_list.remove(word)
                 del query_word_list[:] #Clear query_word_list
