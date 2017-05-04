@@ -103,6 +103,22 @@ def generateQuery(command):
         select_list.append('START_DATE')
 
     #if command.startswith("Where") :
+    if command.startswith("where") :
+        if 'class' or 'lecture' or 'classes' or 'lectures' in query_word_list:
+            where_list.append("TYPE = 'LECTURE'")
+            if 'Distributed Systems Overview' in query_word_list:
+                where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
+            if 'Remote Procedural Calls' in query_word_list:
+                where_list.append("SUB_TYPE = 'Remote Procedural Calls'") 
+            if 'messaging' in query_word_list:
+                where_list.append("SUB_TYPE = 'Messaging'")
+        elif 'exam' in query_word_list:
+            where_list.append("TYPE = 'EXAM'")
+            if 'mid' in query_word_list:
+                where_list.append("SUB_TYPE = 'MID'")
+            else :
+                where_list.append("SUB_TYPE = 'FINAL'")
+        select_list.append('LOCATION')
 
     #if command.startswith("What") :
     
