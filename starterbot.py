@@ -7,7 +7,7 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 import string
-import MySQLdb
+import mysql.connector
 
 # starterbot's ID as an environment variable
 BOT_ID = os.environ.get("BOT_ID")
@@ -17,8 +17,12 @@ AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
 GREETINGS_COMMAND = ["hi","hello","good evening","good morning","hey","who are you?", "good afternoon" "hey bot"]
 HOW_COMMAND = ["how are you?","how are you doing?", "are you ok?"]
-db = MySQLdb.connect("slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com","master","master123","slackbotdb" )
+
+db = mysql.connector.connect(user='master', password='master123',
+                              host='slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com',
+                              database='slackbotdb')
 cur = db.cursor()
+
 where_list = []
 select_list = []
 query_word_list = []
@@ -103,6 +107,18 @@ def generateQuery(command):
     #if command.startswith("What") :
     
     #if command.startswith("Who") :
+    if command.startswith("who"):
+        if 'cmpe' in query_word_list or '273' in query_word_list:
+            where_list.append("TYPE = 'CMPE'")
+            if 'instructor' in query_word_list:
+                where_list.append("SUB_TYPE ='INSTRUCTOR'")
+            elif 'ta' in query_word_list:
+                where_list.append("SUB_TYPE ='TA'")
+        elif 'grade' in query_word_list :
+            where_list.append("TYPE = 'GRADE'")
+            if 'final' in query_word_list or 'project' in query_word_list:
+                where_list.append("SUB_TYPE='finals'")
+        select_list.append('ANSWER')
 
 
 
@@ -112,7 +128,7 @@ if __name__ == "__main__":
     if slack_client.rtm_connect():
         print("StarterBot connected and running!")
         
-        stemmer = SnowballStemmer("english")
+        stemmer = SnowballStemmer("porter")
         lmtzr = WordNetLemmatizer()
         while True:
             command, channel = parse_slack_output(slack_client.rtm_read())
@@ -127,14 +143,21 @@ if __name__ == "__main__":
                 del query_word_list[:] #Clear query_word_list
                 for word in filtered_word_list:
                     lemmaSentence = lmtzr.lemmatize(word)
-                    query_word_list.append(lemmaSentence)
-                print word_list
+                    stm_word= stemmer.stem(lemmaSentence)
+                    print stm_word
+                    query_word_list.append(stm_word)
+                command=""
+                for word in query_word_list:
+                    command+=word+ " "
+                print command
+                    
 
         # print "lemma sentence --:" +lemmaSentence
         # print "stemmer sentence --:" +Stemmer
         # print "command:" + command +" and channel:"+channel
         ##
                 #compose_query(queryWordsList,channel)
+
                 handle_command(command, channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
