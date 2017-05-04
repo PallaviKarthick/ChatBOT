@@ -124,6 +124,10 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'MID'")
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'FINAL'")
+        elif 'cmpe' in query_word_list:
+            where_list.append("TYPE = 'CMPE'")
+            if '273' in query_word_list:
+                where_list.append("SUB_TYPE = '273'")
         select_list.append('ANSWER')
     
     
