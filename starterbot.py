@@ -109,6 +109,24 @@ def generateQuery(command):
         select_list.append('LOCATION')
 
     #if command.startswith("What") :
+    if command.startswith("what"):
+        if 'weightage' in query_word_list:
+            where_list.append("TYPE = 'WEIGHTAGE'")
+            if 'lab' in query_word_list:
+                where_list.append("SUB_TYPE = 'LAB'")
+            elif 'assignment' in query_word_list:
+                where_list.append("SUB_TYPE = 'ASSIGNMENT'")
+            elif 'quiz' in query_word_list:
+                where_list.append("SUB_TYPE = 'QUIZ'")
+            elif 'project' in query_word_list:
+                where_list.append("SUB_TYPE = 'PROJECT'")
+            elif 'midterm' in query_word_list:
+                where_list.append("SUB_TYPE = 'MID'")
+            elif 'final' in query_word_list:
+                where_list.append("SUB_TYPE = 'Final'")
+        select_list.append('WEIGHT')
+    
+    
     
     #if command.startswith("Who") :
     if command.startswith("who"):
