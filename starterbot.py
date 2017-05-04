@@ -104,7 +104,7 @@ def generateQuery(command):
 
     #if command.startswith("Where") :
     if command.startswith("where") :
-        if 'class' or 'lecture' or 'classes' or 'lectures' in query_word_list:
+        if any(word in query_word_list for word in ['class' or 'lecture' or 'classes' or 'lectures' ]):
             where_list.append("TYPE = 'LECTURE'")
             if 'Distributed Systems Overview' in query_word_list:
                 where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
