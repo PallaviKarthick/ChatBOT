@@ -128,6 +128,10 @@ def generateQuery(command):
             where_list.append("TYPE = 'CMPE'")
             if '273' in query_word_list:
                 where_list.append("SUB_TYPE = '273'")
+        elif 'website' in query_word_list:
+            where_list.append("TYPE = 'WEBSITE'")
+        elif 'prerequisite' in query_word_list:
+            where_list.append("TYPE = 'PREREQUISITE'")
         select_list.append('ANSWER')
     
     
