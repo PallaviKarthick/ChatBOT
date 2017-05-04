@@ -89,12 +89,12 @@ def parse_slack_output(slack_rtm_output):
 def generateQuery(command):
     del where_list[:]
     del select_list[:]
-    if command.lower().startswith("when") : #user is asking for a DATE
-        if 'exam' in query_word_list:
+    if command.lower().startswith("when") : #user is asking for a DATE 
+        if any(word in query_word_list for word in ['exam','mid','midterm','final']) :
             where_list.append("TYPE = 'EXAM'")
-            if 'mid' in query_word_list:
+            if any(word in query_word_list for word in ['mid','midterm']):
                 where_list.append("SUB_TYPE = 'MID'")
-            else :
+            else:
                 where_list.append("SUB_TYPE = 'FINAL'")
         select_list.append('START_DATE')
 
