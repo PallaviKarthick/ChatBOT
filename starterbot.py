@@ -125,6 +125,9 @@ def generateQuery(command):
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'Final'")
         select_list.append('WEIGHT')
+        if 'prerequisites' in query_word_list:
+            where_list.append("TYPE = 'PREREQUISITES'")
+        select_list.append('SUB_TYPE')
     
     
     
