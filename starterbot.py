@@ -59,8 +59,12 @@ def handle_command(command, channel):
             query = "SELECT "+ select_string +" FROM course_details" + " WHERE "+where_string
             print query
             cur.execute(query)
-            for row in cur.fetchall():
-                response = str(row[0])
+            response=""
+            for row in cur:
+                for item in row:
+                    print "--response-"+item
+                    response = response + item +" ,"
+       
 
 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
@@ -82,6 +86,7 @@ def generateQuery(command):
     del where_list[:]
     del select_list[:]
     if command.lower().startswith("when") : #user is asking for a DATE 
+        print "-WHEN Clause--"
         if any(word in query_word_list for word in ['exam','mid','midterm','final']) :
             where_list.append("TYPE = 'EXAM'")
             if any(word in query_word_list for word in ['mid','midterm']):
@@ -91,7 +96,8 @@ def generateQuery(command):
         select_list.append('START_DATE')
 
     #if command.startswith("Where") :
-    if command.startswith("where") :
+    elif command.startswith("where") :
+        print "-WHERE Clause--"
         if any(word in query_word_list for word in ['class' or 'lecture' or 'classes' or 'lectures' ]):
             where_list.append("TYPE = 'LECTURE'")
             if 'Distributed Systems Overview' in query_word_list:
@@ -109,7 +115,8 @@ def generateQuery(command):
         select_list.append('LOCATION')
 
     #if command.startswith("What") :
-    if command.startswith("what"):
+    elif command.startswith("what"):
+        print "-WHAT Clause--"
         if 'weightage' in query_word_list:
             where_list.append("TYPE = 'WEIGHTAGE'")
             if 'lab' in query_word_list:
@@ -137,7 +144,8 @@ def generateQuery(command):
     
     
     #if command.startswith("Who") :
-    if command.startswith("who"):
+    elif command.startswith("who"):
+        print "-WHO Clause--"
         if 'cmpe' in query_word_list or '273' in query_word_list:
             where_list.append("TYPE = 'CMPE'")
             if 'instructor' in query_word_list:
@@ -150,7 +158,8 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE='finals'")
         select_list.append('ANSWER')
 
-    if command.startswith("how"):
+    elif command.startswith("how"):
+        print "-HOW Clause--"
         if 'grade' in query_word_list:
             where_list.append("TYPE = 'GRADE'")
             if 'project' in query_word_list:
@@ -158,12 +167,26 @@ def generateQuery(command):
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'FINALS'")
         select_list.append('WEIGHT')
+
+    if any(word in query_word_list for word in ['studi','materi']) :
+        print "-GENERAL Clause--"
+        del select_list[:]
+        where_list.append("TYPE = 'CMPE'")
+        where_list.append("SUB_TYPE = '273'")
+        select_list.append('STUDY_LINKS')
+
+    if 'object' in query_word_list:
+        print "-OBJECTIVE Clause--"
+        del select_list[:]
+        where_list.append("TYPE = 'OBJECTIVES'")
+        select_list.append('ANSWER')
+    if 'protocol' in query_word_list:
+        print "-PROTOCOL Clause--"
+        del select_list[:]
+        where_list.append("TYPE = 'PROTOCOL'")
+        select_list.append('ANSWER')
+           
             
-            
-
-
-
-
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
     if slack_client.rtm_connect():
@@ -200,7 +223,7 @@ if __name__ == "__main__":
         # print "command:" + command +" and channel:"+channel
         ##
                 #compose_query(queryWordsList,channel)
-
+        
                 handle_command(command.strip(), channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
