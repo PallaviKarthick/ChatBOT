@@ -150,6 +150,17 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE='finals'")
         select_list.append('ANSWER')
 
+    if command.startswith("how"):
+        if 'grade' in query_word_list:
+            where_list.append("TYPE = 'GRADE'")
+            if 'project' in query_word_list:
+                where_list.append("SUB_TYPE = 'PROJECTS'")
+            elif 'final' in query_word_list:
+                where_list.append("SUB_TYPE = 'FINALS'")
+        select_list.append('WEIGHT')
+            
+            
+
 
 
 
