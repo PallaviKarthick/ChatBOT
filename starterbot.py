@@ -87,13 +87,34 @@ def generateQuery(command):
     del select_list[:]
     if command.lower().startswith("when") : #user is asking for a DATE 
         print "-WHEN Clause--"
-        if any(word in query_word_list for word in ['exam','mid','midterm','final']) :
+        if any(word in query_word_list for word in ['exam','mid','midterm','final']):
             where_list.append("TYPE = 'EXAM'")
             if any(word in query_word_list for word in ['mid','midterm']):
                 where_list.append("SUB_TYPE = 'MID'")
             else:
                 where_list.append("SUB_TYPE = 'FINAL'")
-        select_list.append('START_DATE')
+        
+        if any(word in query_word_list for word in ['lab','lab1','lab2','lab3']):
+            where_list.append("TYPE = 'LAB'")
+            if any('1' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '1'")
+            elif any('2' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '2'")
+            elif any('3' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '3'")
+        elif any(word in query_word_list for word in ['assignment','assignment1','assignment2','assignment3']):
+            where_list.append("TYPE = 'ASSIGNMENT'")  
+            if any('1' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '1'")
+            elif any('2' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '2'")
+            elif any('3' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '3'")
+
+        if any('due' in s for s in query_word_list):
+            select_list.append('DUE_DATE')
+        else :
+            select_list.append('START_DATE')   
 
     #if command.startswith("Where") :
     elif command.startswith("where") :
