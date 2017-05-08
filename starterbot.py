@@ -160,6 +160,8 @@ def generateQuery(command):
             where_list.append("TYPE = 'WEBSITE'")
         if 'prerequisite' in query_word_list:
             where_list.append("TYPE = 'PREREQUISITE'")
+        if 'corequisite' in query_word_list:
+            where_list.append("TYPE = 'COREQUISITE'")
         if 'text' in query_word_list:
             where_list.append("TYPE = 'TEXT'")
             if 'book' in query_word_list:
