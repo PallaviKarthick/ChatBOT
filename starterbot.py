@@ -35,9 +35,11 @@ def handle_command(command, channel):
     """Receives commands and returns response. """
 
     print 'handle_command :'+command+":"
+    #default response
+    response = "Sorry!! The bot won't handle this question yet"
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
-        response = "Hello! This is SJSU Bot"
+        response = "Hello! This is Cmpe273 Bot"
         
     elif command in HOW_COMMAND:
         print "HOW_COMMAND"
@@ -49,7 +51,7 @@ def handle_command(command, channel):
 
     else:
         generateQuery(command)
-        if select_list:
+        if select_list and where_list:
             select_string = select_list[0]
             where_string = where_list[0]
             for s in select_list[1:]:
@@ -64,9 +66,7 @@ def handle_command(command, channel):
                 for item in row:
                     print "--response-"+item
                     response = response + item +" ,"
-       
-
-
+    
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
 
 
