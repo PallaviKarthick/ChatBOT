@@ -152,14 +152,18 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'MID'")
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'FINAL'")
-        elif 'cmpe' in query_word_list:
+        if 'cmpe' in query_word_list:
             where_list.append("TYPE = 'CMPE'")
             if '273' in query_word_list:
                 where_list.append("SUB_TYPE = '273'")
-        elif 'website' in query_word_list:
+        if 'website' in query_word_list:
             where_list.append("TYPE = 'WEBSITE'")
-        elif 'prerequisite' in query_word_list:
+        if 'prerequisite' in query_word_list:
             where_list.append("TYPE = 'PREREQUISITE'")
+        if 'text' in query_word_list:
+            where_list.append("TYPE = 'TEXT'")
+            if 'book' in query_word_list:
+                where_list.append("SUB_TYPE = 'BOOK'")
         select_list.append('ANSWER')
     
     
