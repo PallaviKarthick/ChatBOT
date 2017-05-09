@@ -127,12 +127,16 @@ def generateQuery(command):
         print "-WHERE Clause--"
         if any(word in query_word_list for word in ['class' or 'lecture' or 'classes' or 'lectures' ]):
             where_list.append("TYPE = 'LECTURE'")
-            if 'Distributed Systems Overview' in query_word_list:
+            if 'Distributed' in query_word_list:
                 where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
-            if 'Remote Procedural Calls' in query_word_list:
-                where_list.append("SUB_TYPE = 'Remote Procedural Calls'") 
+            elif 'Remote' or 'RPC' in query_word_list:
+                where_list.append("SUB_TYPE = 'Remote Procedural Calls'")  
             if 'messaging' in query_word_list:
                 where_list.append("SUB_TYPE = 'Messaging'")
+                
+        elif '273' in query_word_list:
+                where_list.append("TYPE = 'CMPE' and SUB_TYPE = '273'")
+            
         elif 'exam' in query_word_list:
             where_list.append("TYPE = 'EXAM'")
             if 'mid' in query_word_list:
