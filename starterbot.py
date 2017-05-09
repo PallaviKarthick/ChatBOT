@@ -13,12 +13,13 @@ from cachetools import LFUCache #pip install cachetools
 # starterbot's ID as an environment variable
 BOT_ID = 'U4J4KD6D6'
 USER_NAME = None
+EMOJI =None
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
 GREETINGS_COMMAND = ["hi","hello","good even","good morn","hey","who", "good afternoon" "hey bot"]
-HOW_COMMAND = ["how", "ok"]
+HOW_COMMAND = ["how", "ok" ,"how r u"]
 
 db = mysql.connector.connect(user='master', password='master123',
                               host='slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com',
@@ -31,7 +32,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-0V61sUs1Flzha64WwL8vM5y9')
+slack_client = SlackClient('xoxb-154155448448-tpJY8DjhBw8QHHQtmAym5QAR')
 
 
 def handle_command(command, channel):
@@ -43,16 +44,20 @@ def handle_command(command, channel):
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
         response = "Hello! "+USER_NAME+" This is Cmpe273 BOT"
+        EMOJI = 'slight_smile'
         
     elif command in HOW_COMMAND:
         print "HOW_COMMAND"
         response = "I am good "+ USER_NAME+". How may I help you?"
+        EMOJI = 'sunglasses'
         
     elif command == "thank" or command == "thank you":
         print "THANK"
         response = "Happy to help you!!"
+        EMOJI = 'tada'
 
     else:
+        EMOJI = 'point_left'
         generateQuery(command)
         if select_list and where_list:
             select_string = select_list[0]
@@ -71,8 +76,7 @@ def handle_command(command, channel):
                     response = response + item +" ,"
                   
     bot_cache[command] = response 
-    slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
-
+    slack_client.api_call("chat.postMessage", channel=channel,text=response+":"+EMOJI+":", as_user=True)
 
 
 def parse_slack_output(slack_rtm_output):
@@ -116,8 +120,6 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = '3'")
 
         if any('due' in s for s in query_word_list):
-            if 'project' or 'projects' in query_word_list:
-                where_list.append("TYPE = 'PROJECT'")
             select_list.append('DUE_DATE')
         else :
             select_list.append('START_DATE')   
@@ -127,16 +129,12 @@ def generateQuery(command):
         print "-WHERE Clause--"
         if any(word in query_word_list for word in ['class' or 'lecture' or 'classes' or 'lectures' ]):
             where_list.append("TYPE = 'LECTURE'")
-            if 'Distributed' in query_word_list:
+            if 'Distributed Systems Overview' in query_word_list:
                 where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
-            elif 'Remote' or 'RPC' in query_word_list:
-                where_list.append("SUB_TYPE = 'Remote Procedural Calls'")  
+            if 'Remote Procedural Calls' in query_word_list:
+                where_list.append("SUB_TYPE = 'Remote Procedural Calls'") 
             if 'messaging' in query_word_list:
                 where_list.append("SUB_TYPE = 'Messaging'")
-                
-        elif '273' in query_word_list:
-                where_list.append("TYPE = 'CMPE' and SUB_TYPE = '273'")
-            
         elif 'exam' in query_word_list:
             where_list.append("TYPE = 'EXAM'")
             if 'mid' in query_word_list:
@@ -217,25 +215,24 @@ def generateQuery(command):
             where_list.append("TYPE = 'DEPARTMENT'")
         select_list.append('ANSWER')
 
-
-    if any(word in query_word_list for word in ['studi','materi']) :
+    elif any(word in query_word_list for word in ['studi','materi']) :
         print "-GENERAL Clause--"
         del select_list[:]
         where_list.append("TYPE = 'CMPE'")
         where_list.append("SUB_TYPE = '273'")
         select_list.append('STUDY_LINKS')
 
-    if 'object' in query_word_list:
+    elif 'object' in query_word_list:
         print "-OBJECTIVE Clause--"
         del select_list[:]
         where_list.append("TYPE = 'OBJECTIVES'")
         select_list.append('ANSWER')
-    if 'protocol' in query_word_list:
+    elif 'protocol' in query_word_list:
         print "-PROTOCOL Clause--"
         del select_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
-    if 'time' or 'hour' in query_word_list:
+    elif 'time' or 'hour' in query_word_list:
         print "-hour Clause--"
         del select_list[:]
         where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
@@ -269,6 +266,8 @@ if __name__ == "__main__":
                     print USER_NAME
                 except ValueError:
                     print ValueError
+                del where_list[:]
+                del select_list[:]
                 word_list = command.lower().split(" ")
                 #print word_list
                 filtered_word_list = word_list[:]
@@ -286,7 +285,8 @@ if __name__ == "__main__":
                 query_word_list = [s.strip('?') for s in query_word_list]
                 for word in query_word_list:
                     command+=word+ " "
-                print command
+                print "---"+  command
+                
                     
 
         # print "lemma sentence --:" +lemmaSentence
@@ -296,6 +296,7 @@ if __name__ == "__main__":
                 #compose_query(queryWordsList,channel)
         
                 if(bot_cache.__contains__(command.strip())):
+                    print "CACHE---"
                     slack_client.api_call("chat.postMessage", channel=channel,text=bot_cache[command.strip()], as_user=True)
                 else:
                     handle_command(command.strip(), channel)
