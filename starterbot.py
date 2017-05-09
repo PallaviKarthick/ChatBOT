@@ -157,6 +157,10 @@ def generateQuery(command):
             where_list.append("TYPE = 'CMPE'")
             if '273' in query_word_list:
                 where_list.append("SUB_TYPE = '273'")
+        if 'professor' in query_word_list:
+            where_list.append("TYPE = 'PROFESSOR'")
+            if 'email' in query_word_list:
+                where_list.append("SUB_TYPE = 'EMAIL'")
         if 'website' in query_word_list:
             where_list.append("TYPE = 'WEBSITE'")
         if 'prerequisite' in query_word_list:
