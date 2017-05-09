@@ -10,13 +10,14 @@ import string
 import mysql.connector
 
 # starterbot's ID as an environment variable
-BOT_ID = os.environ.get("BOT_ID")
+BOT_ID = 'U4J4KD6D6'
+USER_NAME = None
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
-GREETINGS_COMMAND = ["hi","hello","good evening","good morning","hey","who are you?", "good afternoon" "hey bot"]
-HOW_COMMAND = ["how are you?","how are you doing?", "are you ok?"]
+GREETINGS_COMMAND = ["hi","hello","good even","good morn","hey","who", "good afternoon" "hey bot"]
+HOW_COMMAND = ["how", "ok"]
 
 db = mysql.connector.connect(user='master', password='master123',
                               host='slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com',
@@ -28,22 +29,22 @@ select_list = []
 query_word_list = []
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
+slack_client = SlackClient('xoxb-154155448448-4JM8V22vBL8Z5DKLZ2ceAu44')
 
 
 def handle_command(command, channel):
     """Receives commands and returns response. """
 
-    print 'handle_command :'+command+":"
+    print 'handle_command :'+command
     #default response
-    response = "Sorry!! The bot won't handle this question yet"
+    response = "Sorry!! The BOT won't handle this question yet"
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
-        response = "Hello! This is Cmpe273 Bot"
+        response = "Hello! "+USER_NAME+" This is Cmpe273 BOT"
         
     elif command in HOW_COMMAND:
         print "HOW_COMMAND"
-        response = "I am good. How may I help you?"            
+        response = "I am good "+ USER_NAME+". How may I help you?"
         
     elif command == "thank" or command == "thank you":
         print "THANK"
@@ -78,9 +79,9 @@ def parse_slack_output(slack_rtm_output):
         for output in output_list:
             if output and 'text' in output and AT_BOT in output['text']:
                 # return text after the @ mention, whitespace removed
-                return output['text'].split(AT_BOT)[1].strip().lower(), \
-                    output['channel']
-    return None, None
+                return output['text'].split(AT_BOT)[1].strip().lower(), output['channel'],output['user']
+
+    return None, None ,None
 
 def generateQuery(command):
     del where_list[:]
@@ -212,20 +213,35 @@ def generateQuery(command):
         del select_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
-           
-            
+
+
+def get_user_name(sc , user_id):
+    api_call= sc.api_call("users.list")
+    users = api_call.get('members')
+    for user in users:
+        for user in users:
+            if 'name' in user and user.get('id') == user_id:
+                print "user name is" + user['name']
+                return user['name']
+
+
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
     if slack_client.rtm_connect():
-        print("StarterBot connected and running!")
+        print("SJSU chatBOT connected and running!")
         
         stemmer = SnowballStemmer("porter")
         lmtzr = WordNetLemmatizer()
         stop_words= set(stopwords.words('english'))
         stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}'])
         while True:
-            command, channel = parse_slack_output(slack_client.rtm_read())
+            command, channel,user = parse_slack_output(slack_client.rtm_read())
             if command and channel:
+                try :
+                    USER_NAME = get_user_name(slack_client ,user)
+                    print USER_NAME
+                except ValueError:
+                    print ValueError
                 word_list = command.lower().split(" ")
                 #print word_list
                 filtered_word_list = word_list[:]
