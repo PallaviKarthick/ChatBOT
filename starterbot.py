@@ -8,6 +8,7 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 import string
 import mysql.connector
+from cachetools import LFUCache #pip install cachetools
 
 # starterbot's ID as an environment variable
 BOT_ID = 'U4J4KD6D6'
@@ -27,6 +28,7 @@ cur = db.cursor()
 where_list = []
 select_list = []
 query_word_list = []
+bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
 slack_client = SlackClient('xoxb-154155448448-4JM8V22vBL8Z5DKLZ2ceAu44')
@@ -67,7 +69,8 @@ def handle_command(command, channel):
                 for item in row:
                     print "--response-"+item
                     response = response + item +" ,"
-    
+                  
+    bot_cache[command] = response 
     slack_client.api_call("chat.postMessage", channel=channel,text=response, as_user=True)
 
 
@@ -271,7 +274,10 @@ if __name__ == "__main__":
         ##
                 #compose_query(queryWordsList,channel)
         
-                handle_command(command.strip(), channel)
+                if(bot_cache.__contains__(command.strip())):
+                    slack_client.api_call("chat.postMessage", channel=channel,text=bot_cache[command.strip()], as_user=True)
+                else:
+                    handle_command(command.strip(), channel)
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
