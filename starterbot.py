@@ -229,6 +229,11 @@ def generateQuery(command):
         del select_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
+    if 'time' or 'hour' in query_word_list:
+        print "-hour Clause--"
+        del select_list[:]
+        where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
+        select_list.append('START_DATE')
 
 
 def get_user_name(sc , user_id):
