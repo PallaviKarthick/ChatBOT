@@ -106,7 +106,7 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = '2'")
             elif any('3' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = '3'")
-        elif any(word in query_word_list for word in ['assignment','assignment1','assignment2','assignment3']):
+        elif any(word in query_word_list for word in ['assignment','assignment1','assignment2','assignment3','assign']):
             where_list.append("TYPE = 'ASSIGNMENT'")  
             if any('1' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = '1'")
@@ -272,6 +272,7 @@ if __name__ == "__main__":
                     print stm_word
                     query_word_list.append(stm_word)
                 command=""
+                query_word_list = [s.strip('?') for s in query_word_list]
                 for word in query_word_list:
                     command+=word+ " "
                 print command
