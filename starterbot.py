@@ -31,7 +31,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-4JM8V22vBL8Z5DKLZ2ceAu44')
+slack_client = SlackClient('xoxb-154155448448-0V61sUs1Flzha64WwL8vM5y9')
 
 
 def handle_command(command, channel):
@@ -202,6 +202,15 @@ def generateQuery(command):
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'FINALS'")
         select_list.append('WEIGHT')
+
+    elif command.startswith("which"):
+        print "-WHICH Clause--"+command
+        print query_word_list
+        if any(word in query_word_list for word in ['cmpe', '273' ,'distribut', 'system' ]):
+            print 'inside which'
+            where_list.append("TYPE = 'DEPARTMENT'")
+        select_list.append('ANSWER')
+
 
     if any(word in query_word_list for word in ['studi','materi']) :
         print "-GENERAL Clause--"
