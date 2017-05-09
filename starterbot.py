@@ -32,7 +32,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-tpJY8DjhBw8QHHQtmAym5QAR')
+slack_client = SlackClient('xoxb-154155448448-KZaBzKiWhu7IxU9Gv9Z2DVaO')
 
 
 def handle_command(command, channel):
@@ -40,11 +40,11 @@ def handle_command(command, channel):
 
     print 'handle_command :'+command
     #default response
-    response = "Sorry!! The BOT won't handle this question yet"
+    response = "Sorry!! The BOT won't handle this question yet :hushed:"
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
         response = "Hello! "+USER_NAME+" This is Cmpe273 BOT"
-        EMOJI = 'slight_smile'
+        EMOJI = 'simple_smile'
         
     elif command in HOW_COMMAND:
         print "HOW_COMMAND"
@@ -74,7 +74,7 @@ def handle_command(command, channel):
                 for item in row:
                     print "--response-"+item
                     response = response + item +" ,"
-                  
+                
     bot_cache[command] = response 
     slack_client.api_call("chat.postMessage", channel=channel,text=response+":"+EMOJI+":", as_user=True)
 
@@ -232,8 +232,9 @@ def generateQuery(command):
         del select_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
-    elif 'time' or 'hour' in query_word_list:
+    elif any(word in query_word_list for word in ['time','hour']) :
         print "-hour Clause--"
+        print query_word_list
         del select_list[:]
         where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
         select_list.append('START_DATE')
