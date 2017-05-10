@@ -1,0 +1,22 @@
+Sample Questions:
+1.	What is CMPE 273?
+2.	Where would the final exam be held?
+3.	When is the final exam?
+4.	When is the mid term exam?
+5.	What is the weightage of Labs, Quizes, Assignments, Midterm, Final?
+6.	What is the study material for CMPE 273?
+7.	What are the prerequisites for CMPE 273?
+8.	Who is the instructor for CMPE 273?
+9.	Who is the TA for CMPE 273?
+10.	Where is cmpe 273 lecture held?
+11.	What is the course website for CMPE 273?
+12.	what is objective of cmpe273?
+13.	who will be grading our project/exams?
+14.	What is professor’s email ID?
+15.	which dept offers the course on Distributed Systems belong to?
+16.	Give me the protocol used for classes
+17.	when is project demo?
+18.	When are the labs due?
+19.	Who will be grading our finals/project/labs/assignments?
+20.	when is cmpe273 final exam?
+21.	When was the mid term exam?
