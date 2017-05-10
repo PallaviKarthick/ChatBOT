@@ -152,27 +152,27 @@ def generateQuery(command):
         print "-WHAT Clause--"
         if any(word in query_word_list for word in ['weight' , 'weightag' , 'weightage']):
             where_list.append("TYPE = 'WEIGHTAGE'")
-            if 'lab' in query_word_list:
+            if any('lab' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = 'LAB'")
-            elif 'assignment' in query_word_list:
+            elif any('assign' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = 'ASSIGNMENT'")
             elif 'quiz' in query_word_list:
                 where_list.append("SUB_TYPE = 'QUIZ'")
             elif 'project' in query_word_list:
                 where_list.append("SUB_TYPE = 'PROJECT'")
-            elif 'midterm' in query_word_list:
+            elif any('mid' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = 'MID'")
-            elif 'final' in query_word_list:
+            elif any('final' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = 'FINAL'")
         elif 'cmpe' in query_word_list:
             where_list.append("TYPE = 'CMPE'")
             if '273' in query_word_list:
                 where_list.append("SUB_TYPE = '273'")
-        elif 'professor' in query_word_list:
+        elif any('prof' in s for s in query_word_list):
             where_list.append("TYPE = 'PROFESSOR'")
             if 'email' in query_word_list:
                 where_list.append("SUB_TYPE = 'EMAIL'")
-        elif 'websit' in query_word_list:
+        elif any('websit' in s for s in query_word_list):
             where_list.append("TYPE = 'WEBSITE'")
         elif any('prereq' in s for s in query_word_list):
             where_list.append("TYPE = 'PREREQUISITE'")
@@ -183,7 +183,6 @@ def generateQuery(command):
             if 'book' in query_word_list:
                 where_list.append("SUB_TYPE = 'BOOK'")
         select_list.append('ANSWER')
-    
     
     
     #if command.startswith("Who") :
