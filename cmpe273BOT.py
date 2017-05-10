@@ -10,6 +10,7 @@ import string
 import mysql.connector
 from cachetools import LFUCache #pip install cachetools
 import re
+import random
 
 # starterbot's ID as an environment variable
 BOT_ID = 'U4J4KD6D6'
@@ -41,8 +42,9 @@ def handle_command(command, channel):
     """Receives commands and returns response. """
 
     print 'handle_command :'+command
-    default_response = "Sorry!! The BOT isn't handling this question yet :hushed:"
-    response = default_response
+    default_response = ["Sorry!! The BOT isn't handling this question yet :hushed:",
+     "BOT could not understand the message. Can you please rephrase:confused : ","Sorry !! could not find the answer:neutral_face:"]
+    response = random.choice(default_response)
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
         response = "Hello! "+USER_NAME+" This is Cmpe273 BOT"
@@ -86,7 +88,7 @@ def handle_command(command, channel):
                 if cur.rowcount > 1:
                     response += "\n"
     
-    if (response!=default_response):
+    if (response not in default_response):
         bot_cache[command] = response
     slack_client.api_call("chat.postMessage", channel=channel,text=response+" :"+EMOJI+":", as_user=True)
 
@@ -224,15 +226,15 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = '273'")
         elif 'text' in query_word_list:
             where_list.append("TYPE = 'TEXT'")
-            if 'book' in query_word_list:
+            if 'book' in query_word_list: 
                 where_list.append("SUB_TYPE = 'BOOK'")
-        select_list.append('ANSWER')
-        
+
         elif 'object' in query_word_list:
             print "-OBJECTIVE Clause--"
             del select_list[:]
             del where_list[:]
             where_list.append("TYPE = 'OBJECTIVES'")
+        select_list.append('ANSWER')
     
     
     #if command.startswith("Who") :
