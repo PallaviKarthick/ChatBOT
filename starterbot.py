@@ -32,7 +32,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-KZaBzKiWhu7IxU9Gv9Z2DVaO')
+slack_client = SlackClient('xoxb-154155448448-dV0MCJdtWsGAcDJcE0c5hPyK')
 
 
 def handle_command(command, channel):
@@ -146,7 +146,7 @@ def generateQuery(command):
     #if command.startswith("What") :
     elif command.startswith("what"):
         print "-WHAT Clause--"
-        if 'weightage' in query_word_list:
+        if any(word in query_word_list for word in ['weight' , 'weightag' , 'weightage']):
             where_list.append("TYPE = 'WEIGHTAGE'")
             if 'lab' in query_word_list:
                 where_list.append("SUB_TYPE = 'LAB'")
@@ -160,21 +160,21 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'MID'")
             elif 'final' in query_word_list:
                 where_list.append("SUB_TYPE = 'FINAL'")
-        if 'cmpe' in query_word_list:
+        elif 'cmpe' in query_word_list:
             where_list.append("TYPE = 'CMPE'")
             if '273' in query_word_list:
                 where_list.append("SUB_TYPE = '273'")
-        if 'professor' in query_word_list:
+        elif 'professor' in query_word_list:
             where_list.append("TYPE = 'PROFESSOR'")
             if 'email' in query_word_list:
                 where_list.append("SUB_TYPE = 'EMAIL'")
-        if 'website' in query_word_list:
+        elif 'websit' in query_word_list:
             where_list.append("TYPE = 'WEBSITE'")
-        if 'prerequisite' in query_word_list:
+        elif 'prerequisite' in query_word_list:
             where_list.append("TYPE = 'PREREQUISITE'")
-        if 'corequisite' in query_word_list:
+        elif 'corequisite' in query_word_list:
             where_list.append("TYPE = 'COREQUISITE'")
-        if 'text' in query_word_list:
+        elif 'text' in query_word_list:
             where_list.append("TYPE = 'TEXT'")
             if 'book' in query_word_list:
                 where_list.append("SUB_TYPE = 'BOOK'")
@@ -185,12 +185,13 @@ def generateQuery(command):
     #if command.startswith("Who") :
     elif command.startswith("who"):
         print "-WHO Clause--"
-        if 'cmpe' in query_word_list or '273' in query_word_list:
-            where_list.append("TYPE = 'CMPE'")
-            if 'instructor' in query_word_list:
-                where_list.append("SUB_TYPE ='INSTRUCTOR'")
+        del where_list[:]
+        del select_list[:]
+        if any(word in query_word_list for word in ['cmpe', '273', 'instructor' , 'professor','ta' ]):
+            if any(word in query_word_list for word in ['instructor' , 'professor']):
+                where_list.append("TYPE ='PROFESSOR'")
             elif 'ta' in query_word_list:
-                where_list.append("SUB_TYPE ='TA'")
+                where_list.append("TYPE ='TA'")
         elif 'grade' in query_word_list :
             where_list.append("TYPE = 'GRADE'")
             if 'final' in query_word_list or 'project' in query_word_list:
@@ -215,27 +216,31 @@ def generateQuery(command):
             where_list.append("TYPE = 'DEPARTMENT'")
         select_list.append('ANSWER')
 
-    elif any(word in query_word_list for word in ['studi','materi']) :
+    if any(word in query_word_list for word in ['studi','materi']) :
         print "-GENERAL Clause--"
         del select_list[:]
+        del where_list[:]
         where_list.append("TYPE = 'CMPE'")
         where_list.append("SUB_TYPE = '273'")
-        select_list.append('STUDY_LINKS')
+        select_list.append('ANSWER1')
 
-    elif 'object' in query_word_list:
+    if 'object' in query_word_list:
         print "-OBJECTIVE Clause--"
         del select_list[:]
+        del where_list[:]
         where_list.append("TYPE = 'OBJECTIVES'")
         select_list.append('ANSWER')
-    elif 'protocol' in query_word_list:
+    if 'protocol' in query_word_list:
         print "-PROTOCOL Clause--"
         del select_list[:]
+        del where_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
-    elif any(word in query_word_list for word in ['time','hour']) :
+    if any(word in query_word_list for word in ['time','hour']) :
         print "-hour Clause--"
         print query_word_list
         del select_list[:]
+        del where_list[:]
         where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
         select_list.append('START_DATE')
 
@@ -304,10 +309,3 @@ if __name__ == "__main__":
                 time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
-
-
-
-
-
-    
-   
