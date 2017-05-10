@@ -23,7 +23,6 @@ GREETINGS_COMMAND = ["hi","hello","good even","good morn","hey","who", "good aft
 HOW_COMMAND = ["how", "ok" ,"how r u"]
 BYE_COMMAND = ["bye", "have a nice day","goodbye"]
 
-
 db = mysql.connector.connect(user='master', password='master123',
                               host='slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com',
                               database='slackbotdb')
@@ -35,7 +34,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-HzusI3YWgtbu6P9ytv4aZCsj')
+slack_client = SlackClient('xoxb-154155448448-u6kXw5AupkPCLopjW0lRs41L')
 
 
 def handle_command(command, channel):
@@ -331,10 +330,10 @@ if __name__ == "__main__":
     if slack_client.rtm_connect():
         print("SJSU chatBOT connected and running!")
         bot_cache.clear() #Clear Cache
-        stemmer = SnowballStemmer("porter")
+        stemmer = SnowballStemmer("english")
         lmtzr = WordNetLemmatizer()
         stop_words= set(stopwords.words('english'))
-        stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}'])
+        stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}','th','st','nd','rd'])
         while True:
             command, channel,user = parse_slack_output(slack_client.rtm_read())
             if command and channel:
