@@ -144,6 +144,25 @@ def generateQuery(command):
 
         elif any(word in query_word_list for word in ['project','demo']):
             where_list.append("TYPE = 'PROJECT'") 
+            
+        elif any(word in query_word_list for word in ['week','lectur','class']):
+            print "-WEEK Clause--"
+            print query_word_list
+            print command
+            del select_list[:]
+            del where_list[:]
+            if 'week' in command:
+                for word in query_word_list:
+                    if word not in ['week','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16']:
+                        query_word_list.remove(word)
+                print query_word_list
+                command= ''.join(query_word_list)
+                print "---"+command
+                if bool(re.search('week.?[0-9*]', command)):
+                    week = command.replace(" ","")
+                    where_list.append("TYPE ='"+week+"'")
+            select_list.append('SUB_TYPE')
+            print where_list    
 
         if any('due' in s for s in query_word_list):  
             select_list.append('DUE_DATE')
@@ -208,6 +227,12 @@ def generateQuery(command):
             if 'book' in query_word_list:
                 where_list.append("SUB_TYPE = 'BOOK'")
         select_list.append('ANSWER')
+        
+        elif 'object' in query_word_list:
+            print "-OBJECTIVE Clause--"
+            del select_list[:]
+            del where_list[:]
+            where_list.append("TYPE = 'OBJECTIVES'")
     
     
     #if command.startswith("Who") :
@@ -228,7 +253,7 @@ def generateQuery(command):
 
     elif command.startswith("how"):
         print "-HOW Clause--"
-        if 'grade' in query_word_list:
+        if 'grade' or 'graded' in query_word_list:
             where_list.append("TYPE = 'GRADE'")
             if 'project' in query_word_list:
                 where_list.append("SUB_TYPE = 'PROJECTS'")
