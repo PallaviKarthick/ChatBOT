@@ -33,7 +33,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-kRerruqHLiB4QKY8msdqcwYi')
+slack_client = SlackClient('xoxb-154155448448-HzusI3YWgtbu6P9ytv4aZCsj')
 
 
 def handle_command(command, channel):
@@ -269,10 +269,10 @@ def generateQuery(command):
         else:
             month=None
             date=None
-            for word in ["jan","feb","mar","apr","may"]:
-                month = month_to_day_conversion(word)
+            if any(word in query_word_list for word  in ["jan","feb","mar","april","may","january","februari","march"]):
+                month = month_to_day_conversion(query_word_list[0][:3])
                 print "month "+month
-                command = command.replace(word,month)
+                command = command.replace(query_word_list[0][:3],month)
                 print "----"+command 
                 month_date = re.sub("\D", "", command)
                 date = month_date[1:]
