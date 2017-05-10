@@ -127,7 +127,13 @@ def generateQuery(command):
         elif any(word in query_word_list for word in ['class','classes','lecture','lectures']):
                  where_list.append("TYPE = 'LAST'")   
                  if any(word in query_word_list for word in ['last','final','previous']):
-                     where_list.append("SUB_TYPE = 'LECTURE'")        
+                     where_list.append("SUB_TYPE = 'LECTURE'")    
+                  elif 'distributed' in query_word_list:
+                    where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
+                 elif 'remote' in query_word_list:
+                    where_list.append("SUB_TYPE = 'Remote Procedure Calls") 
+                 elif 'messaging' in query_word_list:
+                   where_list.append("SUB_TYPE = 'Messaging")
 
         if any('due' in s for s in query_word_list):
             select_list.append('DUE_DATE')
