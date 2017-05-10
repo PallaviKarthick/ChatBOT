@@ -153,6 +153,10 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'Remote Procedural Calls'") 
             if 'messaging' in query_word_list:
                 where_list.append("SUB_TYPE = 'Messaging'")
+                
+        elif '273' in query_word_list:
+                where_list.append("TYPE = 'CMPE' and SUB_TYPE = '273'")
+
         elif 'exam' in query_word_list:
             where_list.append("TYPE = 'EXAM'")
             if 'mid' in query_word_list:
