@@ -21,6 +21,8 @@ AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = ["do","list","help"]
 GREETINGS_COMMAND = ["hi","hello","good even","good morn","hey","who", "good afternoon" "hey bot"]
 HOW_COMMAND = ["how", "ok" ,"how r u"]
+BYE_COMMAND = ["bye", "have a nice day","goodbye"]
+
 
 db = mysql.connector.connect(user='master', password='master123',
                               host='slackbotdb.cnobenweteje.us-west-1.rds.amazonaws.com',
@@ -56,6 +58,11 @@ def handle_command(command, channel):
         print "THANK"
         response = "Happy to help you!!"
         EMOJI = 'tada'
+        
+    elif command in BYE_COMMAND:
+        print "BYE_COMMAND"
+        response = "BYE "+USER_NAME+"! Have a nice day"
+        EMOJI = 'simple_smile'
 
     else:
         EMOJI = 'point_left'
