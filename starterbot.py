@@ -42,8 +42,8 @@ def handle_command(command, channel):
     """Receives commands and returns response. """
 
     print 'handle_command :'+command
-    #default response
-    response = "Sorry!! The BOT won't handle this question yet :hushed:"
+    default_response = "Sorry!! The BOT isn't handling this question yet :hushed:"
+    response = default_response
     if command in GREETINGS_COMMAND:
         print "GREETINGS_COMMAND"
         response = "Hello! "+USER_NAME+" This is Cmpe273 BOT"
@@ -54,7 +54,7 @@ def handle_command(command, channel):
         response = "I am good "+ USER_NAME+". How may I help you?"
         EMOJI = 'sunglasses'
         
-    elif command in ["thank","thank you","good","bye","good bye"]:
+    elif command in ["thank","thank you"]:
         print "THANK"
         response = "Happy to help you!!"
         EMOJI = 'tada'
@@ -77,16 +77,18 @@ def handle_command(command, channel):
             query = "SELECT "+ select_string +" FROM course_details" + " WHERE "+where_string
             print query
             cur.execute(query)
-            response=""
-            temp = ""
+            response = ""
             for row in cur:
                 for item in row:
                     print "--response-"+str(item)
-                    if (len(row) > 1):
-                        temp = " ,"    
-                    response = response + str(item) + temp
-                
-    bot_cache[command] = response 
+                    response = response + str(item)
+                    if len(row) > 1:
+                        response += ' ,'
+                if cur.rowcount > 1:
+                    response += "\n"
+    
+    if (response!=default_response):
+        bot_cache[command] = response
     slack_client.api_call("chat.postMessage", channel=channel,text=response+" :"+EMOJI+":", as_user=True)
 
 
@@ -99,13 +101,12 @@ def parse_slack_output(slack_rtm_output):
             if output and 'text' in output and AT_BOT in output['text']:
                 # return text after the @ mention, whitespace removed
                 return output['text'].split(AT_BOT)[1].strip().lower(), output['channel'],output['user']
-
     return None, None ,None
 
 def generateQuery(command):
     del where_list[:]
     del select_list[:]
-    if command.lower().startswith("when") : #user is asking for a DATE 
+    if command.startswith("when") : #assuming user is asking for a DATE 
         print "-WHEN Clause--"
         if any(word in query_word_list for word in ['exam','mid','midterm','final']):
             where_list.append("TYPE = 'EXAM'")
@@ -114,7 +115,7 @@ def generateQuery(command):
             else:
                 where_list.append("SUB_TYPE = 'FINAL'")
         
-        if any(word in query_word_list for word in ['lab','lab1','lab2','lab3']):
+        elif any(word in query_word_list for word in ['lab','lab1','lab2','lab3']):
             where_list.append("TYPE = 'LAB'")
             if any('1' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = '1'")
@@ -131,28 +132,28 @@ def generateQuery(command):
             elif any('3' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = '3'")
                 
-        elif any(word in query_word_list for word in ['class','classes','lecture','lectures']):
+        elif any(word in query_word_list for word in ['class','classes','lecture','lectures','lectur']):
                  where_list.append("TYPE = 'LAST'")   
                  if any(word in query_word_list for word in ['last','final','previous']):
                      where_list.append("SUB_TYPE = 'LECTURE'")    
-                  elif 'distributed' in query_word_list:
+                 elif 'distributed' in query_word_list:
                     where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
                  elif 'remote' in query_word_list:
                     where_list.append("SUB_TYPE = 'Remote Procedure Calls") 
                  elif 'messaging' in query_word_list:
                    where_list.append("SUB_TYPE = 'Messaging")
 
-        if any('due' in s for s in query_word_list):
-            if 'project' or 'projects' in query_word_list:
-                where_list.append("TYPE = 'PROJECT'")   
+        elif any(word in query_word_list for word in ['project','demo']):
+            where_list.append("TYPE = 'PROJECT'") 
+
+        if any('due' in s for s in query_word_list):  
             select_list.append('DUE_DATE')
         else :
             select_list.append('START_DATE')   
 
-    #if command.startswith("Where") :
     elif command.startswith("where") :
         print "-WHERE Clause--"
-        if any(word in query_word_list for word in ['class' or 'lecture' or 'classes' or 'lectures' ]):
+        if any(word in query_word_list for word in ['class','lecture','classes','lectures','lectur']):
             where_list.append("TYPE = 'LECTURE'")
             if 'Distributed Systems Overview' in query_word_list:
                 where_list.append("SUB_TYPE = 'Distributed Systems Overview'")
@@ -189,10 +190,6 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'MID'")
             elif any('final' in s for s in query_word_list):
                 where_list.append("SUB_TYPE = 'FINAL'")
-        elif 'cmpe' in query_word_list:
-            where_list.append("TYPE = 'CMPE'")
-            if '273' in query_word_list:
-                where_list.append("SUB_TYPE = '273'")
         elif any('prof' in s for s in query_word_list):
             where_list.append("TYPE = 'PROFESSOR'")
             if 'email' in query_word_list:
@@ -203,6 +200,10 @@ def generateQuery(command):
             where_list.append("TYPE = 'PREREQUISITE'")
         elif any('coreq' in s for s in query_word_list):
             where_list.append("TYPE = 'COREQUISITE'")
+        elif any('cmpe' in s for s in query_word_list):
+            where_list.append("TYPE = 'CMPE'")
+            if any('273' in s for s in query_word_list):
+                where_list.append("SUB_TYPE = '273'")
         elif 'text' in query_word_list:
             where_list.append("TYPE = 'TEXT'")
             if 'book' in query_word_list:
@@ -215,8 +216,8 @@ def generateQuery(command):
         print "-WHO Clause--"
         del where_list[:]
         del select_list[:]
-        if any(word in query_word_list for word in ['cmpe', '273', 'instructor' , 'professor','ta' ]):
-            if any(word in query_word_list for word in ['instructor' , 'professor']):
+        if any(word in query_word_list for word in ['instructor','ta']) or any('prof' in s for s in query_word_list):
+            if 'ta' not in query_word_list: 
                 where_list.append("TYPE ='PROFESSOR'")
             elif 'ta' in query_word_list:
                 where_list.append("TYPE ='TA'")
@@ -239,18 +240,19 @@ def generateQuery(command):
     elif command.startswith("which"):
         print "-WHICH Clause--"+command
         print query_word_list
-        if any(word in query_word_list for word in ['cmpe', '273' ,'distribut', 'system' ]):
+        if any(word in query_word_list for word in ['cmpe', '273' ,'distribut', 'system','cmpe273' ]):
             print 'inside which'
             where_list.append("TYPE = 'DEPARTMENT'")
         select_list.append('ANSWER')
 
+    #if not command.startswith(("who", "where", "when", "how")):
     if any(word in query_word_list for word in ['studi','materi']) :
         print "-GENERAL Clause--"
         del select_list[:]
         del where_list[:]
         where_list.append("TYPE = 'CMPE'")
         where_list.append("SUB_TYPE = '273'")
-        select_list.append('ANSWER1')
+        select_list.append('ANSWER1') 
 
     if 'object' in query_word_list:
         print "-OBJECTIVE Clause--"
@@ -258,13 +260,15 @@ def generateQuery(command):
         del where_list[:]
         where_list.append("TYPE = 'OBJECTIVES'")
         select_list.append('ANSWER')
+
     if 'protocol' in query_word_list:
         print "-PROTOCOL Clause--"
         del select_list[:]
         del where_list[:]
         where_list.append("TYPE = 'PROTOCOL'")
         select_list.append('ANSWER')
-    if any(word in query_word_list for word in ['time','hour']) :
+
+    if any(word in query_word_list for word in ['time','hour']) or any('tim' in s for s in query_word_list):
         print "-hour Clause--"
         print query_word_list
         del select_list[:]
@@ -272,7 +276,7 @@ def generateQuery(command):
         where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
         select_list.append('START_DATE')
     
-    if any(word in query_word_list for word in ['week','lectur','class']):
+    elif any(word in query_word_list for word in ['week','lectur','class']) and not command.startswith(("when","where")):
         print "-WEEK Clause--"
         print query_word_list
         print command
@@ -302,16 +306,10 @@ def generateQuery(command):
                 date = month_date[1:]
                 date = month+'/'+date
                 print ">>>>"+date
-            where_list.append("SUB_TYPE ='"+date+"'")
-            select_list.append('ANSWER')
+                where_list.append("SUB_TYPE ='"+date+"'")
+                select_list.append('ANSWER')
 
                 
-                
-
-
-            
-            
-            
 def get_user_name(sc , user_id):
     api_call= sc.api_call("users.list")
     users = api_call.get('members')
@@ -367,14 +365,6 @@ if __name__ == "__main__":
                 print "---"+  command
                 print query_word_list
                 
-                    
-
-        # print "lemma sentence --:" +lemmaSentence
-        # print "stemmer sentence --:" +Stemmer
-        # print "command:" + command +" and channel:"+channel
-        ##
-                #compose_query(queryWordsList,channel)
-        
                 if(bot_cache.__contains__(command.strip())):
                     print "CACHE---"
                     slack_client.api_call("chat.postMessage", channel=channel,text=bot_cache[command.strip()], as_user=True)
