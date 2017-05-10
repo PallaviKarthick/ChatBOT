@@ -136,6 +136,8 @@ def generateQuery(command):
                    where_list.append("SUB_TYPE = 'Messaging")
 
         if any('due' in s for s in query_word_list):
+            if 'project' or 'projects' in query_word_list:
+                where_list.append("TYPE = 'PROJECT'")   
             select_list.append('DUE_DATE')
         else :
             select_list.append('START_DATE')   
