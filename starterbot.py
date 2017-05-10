@@ -70,13 +70,17 @@ def handle_command(command, channel):
             print query
             cur.execute(query)
             response=""
+            temp = ""
             for row in cur:
                 for item in row:
-                    print "--response-"+item
-                    response = response + item +" ,"
+                    print "--response-"+str(item)
+                    if (len(row) > 1):
+                        temp = " ,"    
+                    response = response + str(item) + temp
                 
     bot_cache[command] = response 
-    slack_client.api_call("chat.postMessage", channel=channel,text=response+":"+EMOJI+":", as_user=True)
+    slack_client.api_call("chat.postMessage", channel=channel,text=response+" :"+EMOJI+":", as_user=True)
+
 
 
 def parse_slack_output(slack_rtm_output):
@@ -170,9 +174,9 @@ def generateQuery(command):
                 where_list.append("SUB_TYPE = 'EMAIL'")
         elif 'websit' in query_word_list:
             where_list.append("TYPE = 'WEBSITE'")
-        elif 'prerequisite' in query_word_list:
+        elif any('prereq' in s for s in query_word_list):
             where_list.append("TYPE = 'PREREQUISITE'")
-        elif 'corequisite' in query_word_list:
+        elif any('coreq' in s for s in query_word_list):
             where_list.append("TYPE = 'COREQUISITE'")
         elif 'text' in query_word_list:
             where_list.append("TYPE = 'TEXT'")
