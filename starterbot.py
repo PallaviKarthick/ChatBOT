@@ -9,6 +9,7 @@ from nltk.corpus import stopwords
 import string
 import mysql.connector
 from cachetools import LFUCache #pip install cachetools
+import re
 
 # starterbot's ID as an environment variable
 BOT_ID = 'U4J4KD6D6'
@@ -32,7 +33,7 @@ query_word_list = []
 bot_cache = LFUCache(maxsize=3) #Cache size 3
 
 # instantiate Slack & Twilio clients
-slack_client = SlackClient('xoxb-154155448448-dV0MCJdtWsGAcDJcE0c5hPyK')
+slack_client = SlackClient('xoxb-154155448448-kRerruqHLiB4QKY8msdqcwYi')
 
 
 def handle_command(command, channel):
@@ -51,7 +52,7 @@ def handle_command(command, channel):
         response = "I am good "+ USER_NAME+". How may I help you?"
         EMOJI = 'sunglasses'
         
-    elif command == "thank" or command == "thank you":
+    elif command in ["thank","thank you","good","bye","good bye"]:
         print "THANK"
         response = "Happy to help you!!"
         EMOJI = 'tada'
@@ -246,8 +247,47 @@ def generateQuery(command):
         del where_list[:]
         where_list.append("ANSWER = 'ENTERPRISE DISTRIBUTED SYSTEMS'")
         select_list.append('START_DATE')
+    
+    if any(word in query_word_list for word in ['week','lectur','class']):
+        print "-WEEK Clause--"
+        print query_word_list
+        print command
+        del select_list[:]
+        del where_list[:]
+        if 'week' in command:
+            for word in query_word_list:
+                if word not in ['week','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16']:
+                    query_word_list.remove(word)
+            print query_word_list
+            command= ''.join(query_word_list)
+            print "---"+command
+            if bool(re.search('week.?[0-9*]', command)):
+                week = command.replace(" ","")
+                where_list.append("TYPE ='"+week+"'")
+                select_list.append('ANSWER')
+            print where_list
+        else:
+            month=None
+            date=None
+            for word in ["jan","feb","mar","apr","may"]:
+                month = month_to_day_conversion(word)
+                print "month "+month
+                command = command.replace(word,month)
+                print "----"+command 
+                month_date = re.sub("\D", "", command)
+                date = month_date[1:]
+                date = month+'/'+date
+                print ">>>>"+date
+            where_list.append("SUB_TYPE ='"+date+"'")
+            select_list.append('ANSWER')
+
+                
+                
 
 
+            
+            
+            
 def get_user_name(sc , user_id):
     api_call= sc.api_call("users.list")
     users = api_call.get('members')
@@ -257,6 +297,12 @@ def get_user_name(sc , user_id):
                 print "user name is" + user['name']
                 return user['name']
 
+def month_to_day_conversion(month):
+    mon={"jan":"1","feb":"2","mar":"3","apr":"4","may":"5"}
+    mon_in_number = mon[month]
+    #print mon_in_number
+    return mon_in_number
+    
 
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
@@ -295,6 +341,7 @@ if __name__ == "__main__":
                 for word in query_word_list:
                     command+=word+ " "
                 print "---"+  command
+                print query_word_list
                 
                     
 
